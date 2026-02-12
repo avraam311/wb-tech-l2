@@ -19,7 +19,7 @@ func TestUnpackString(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.input, func(t *testing.T) {
-			result := unpackString(tc.input)
+			result, _ := unpackString(tc.input)
 			if result != tc.expected {
 				t.Errorf("Test failed with input %s: expected '%s', got '%s'", tc.input, tc.expected, result)
 			}
@@ -38,9 +38,9 @@ func TestErrorHandling(t *testing.T) {
 
 	for _, et := range errTests {
 		t.Run(et.input, func(t *testing.T) {
-			result := unpackString(et.input)
-			if result != et.expected {
-				t.Errorf("Expected error message for input %s: expected '%s', got '%s'", et.input, et.expected, result)
+			_, err := unpackString(et.input)
+			if err.Error() != et.expected {
+				t.Errorf("Expected error message for input %s: expected '%s', got '%s'", et.input, et.expected, err)
 			}
 		})
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"unicode"
@@ -13,14 +14,14 @@ var (
 	errConvertAtoi   = errors.New("cannot convert string to int")
 )
 
-func unpackString(s string) string {
+func unpackString(s string) (string, error) {
 	var res strings.Builder
 	var errInvalidStringFlag = true
 	runesToProcess := []rune(s)
 
 	// если строка пустая, возвращаем ее
 	if len(s) == 0 {
-		return s
+		return s, nil
 	}
 
 	// проходимся по рунам строки
@@ -35,7 +36,7 @@ func unpackString(s string) string {
 		if runesToProcess[i] != '\\' && unicode.IsDigit(runesToProcess[i+1]) {
 			count, err := strconv.Atoi(string(runesToProcess[i+1]))
 			if err != nil {
-				return errConvertAtoi.Error()
+				return "", errConvertAtoi
 			}
 
 			res.WriteString(strings.Repeat(string(runesToProcess[i]), count))
@@ -51,7 +52,7 @@ func unpackString(s string) string {
 
 	// если строка не содержит ни одной буквы, возвращаем ошибку
 	if errInvalidStringFlag {
-		return errInvalidString.Error()
+		return "", errInvalidString
 	}
 
 	// во избежание out of range в цикле мы не доходим до последнего элемента
@@ -63,12 +64,12 @@ func unpackString(s string) string {
 	// число мы использовали, умножим его на символ перед ним, а
 	// использованные числа мы в итоговую строку не добавляем
 	if unicode.IsDigit(runesToProcess[len(runesToProcess)-1]) && runesToProcess[len(runesToProcess)-2] != '\\' {
-		return res.String()
+		return res.String(), nil
 	}
 
 	res.WriteRune(runesToProcess[len(runesToProcess)-1])
 
-	return res.String()
+	return res.String(), nil
 
 	// golangci-lint run выводит 2 предупреждения::
 	// 1. в тестах дублируется цикл 2 разных функциях, но делать из них 1 функцию будет
@@ -78,6 +79,9 @@ func unpackString(s string) string {
 
 func main() {
 	s := "a4bc2d5e"
-	s = unpackString(s)
-	fmt.Println(s)
+	res, err := unpackString(s)
+	if err != nil {
+		log.Fatal("failed to unpack string", err)
+	}
+	fmt.Println(res)
 }
