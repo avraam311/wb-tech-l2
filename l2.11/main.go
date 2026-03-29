@@ -8,11 +8,11 @@ import (
 
 func findAnagrams(words []string) map[string][]string {
 	firstEncounteredWords := make(map[string]string)
-	res := make(map[string][]string)
+	groups := make(map[string][]string)
 
 	for _, word := range words {
-		word = strings.ToLower(word)
-		runes := []rune(word)
+		lower := strings.ToLower(word)
+		runes := []rune(lower)
 
 		sort.Slice(runes, func(i, j int) bool {
 			return runes[i] < runes[j]
@@ -20,19 +20,22 @@ func findAnagrams(words []string) map[string][]string {
 		sortedWord := string(runes)
 
 		if _, ok := firstEncounteredWords[sortedWord]; !ok {
-			firstEncounteredWords[sortedWord] = word
+			firstEncounteredWords[sortedWord] = lower
 		}
 
 		key := firstEncounteredWords[sortedWord]
-		fmt.Println(key)
-		if anagrams, exists := res[key]; exists {
-			anagrams = append(anagrams, word)
-			res[key] = anagrams
-		} else {
-			res[key] = []string{word}
+		groups[key] = append(groups[key], lower)
+	}
+
+	result := make(map[string][]string)
+	for key, anagrams := range groups {
+		if len(anagrams) > 1 {
+			sort.Strings(anagrams)
+			result[key] = anagrams
 		}
 	}
-	return res
+
+	return result
 }
 
 func main() {
@@ -40,8 +43,6 @@ func main() {
 	res := findAnagrams(input)
 
 	for word, anagrams := range res {
-		if len(anagrams) > 1 {
-			fmt.Println(word, anagrams)
-		}
+		fmt.Println(word, anagrams)
 	}
 }
